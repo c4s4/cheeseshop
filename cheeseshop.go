@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -72,17 +73,52 @@ func servePackage(dir, file string, w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filename)
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	parts := strings.Split(r.URL.Path[len(*path):], "/")
-	if len(parts) > 2 {
-		http.Error(w, fmt.Sprintf("%s is not a valid path", r.URL.Path), 404)
+func copyFile(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(100000)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	} else if len(parts) == 1 && parts[0] == "" {
-		listRoot(w, r)
-	} else if len(parts) == 1 {
-		listDirectory(parts[0], w, r)
-	} else {
-		servePackage(parts[0], parts[1], w, r)
+	}
+	m := r.MultipartForm
+	files := m.File["content"]
+	for _, file := range files {
+		name := file.Filename
+		pack := name[:strings.LastIndex(name, "-")]
+		log.Printf("Writing file %s", name)
+		f, err := file.Open()
+		defer f.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		dst, err := os.Create(filepath.Join(*root, pack, name))
+		defer dst.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if _, err := io.Copy(dst, f); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		parts := strings.Split(r.URL.Path[len(*path):], "/")
+		if len(parts) > 2 {
+			http.Error(w, fmt.Sprintf("%s is not a valid path", r.URL.Path), 404)
+			return
+		} else if len(parts) == 1 && parts[0] == "" {
+			listRoot(w, r)
+		} else if len(parts) == 1 {
+			listDirectory(parts[0], w, r)
+		} else {
+			servePackage(parts[0], parts[1], w, r)
+		}
+	} else if r.Method == "POST" {
+		copyFile(w, r)
 	}
 }
 
