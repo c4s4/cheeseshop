@@ -34,7 +34,19 @@ Options on command line :
 - *-path* to set the URL path (defaults to *simple*).
 - *-root* to set the directory where packages are living (defaults to current directory).
 - *-shop* to set the URL of the shop for packages that are not found.
+- *-auth* to set the path to the authentication file
 
 The server outputs logs on the terminal. To get help on the console, type `cheeseshop -help`.
+
+The authentication file is made of lines with the username and the MD5 sum of the password separated with a space, such as (for user *foo* with password *bar*):
+
+    foo 37b51d194a7513e45b56f6524f2d51f2
+
+To compute MD5 sum for a given password, in order to fill the authentication file, you may type following command :
+
+    $ echo -n bar | md5sum
+    37b51d194a7513e45b56f6524f2d51f2  -
+
+If no *-auth* option is set on command line, you won't have to authenticate to upload a package to *CheeseShop*.
 
 *Enjoy!*

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"crypto/md5"
 	"flag"
 	"fmt"
 	"io"
@@ -23,6 +25,9 @@ var port = flag.Int("port", 8000, "The port CheeseShop is listening")
 var path = flag.String("path", "simple", "The URL path")
 var root = flag.String("root", ".", "The root directory for packages")
 var shop = flag.String("shop", "http://pypi.python.org", "Redirection when not found")
+var auth = flag.String("auth", "", "Path to the authentication file")
+
+var users *map[string]string
 
 func listRoot(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Listing root %s", *root)
@@ -74,6 +79,16 @@ func servePackage(dir, file string, w http.ResponseWriter, r *http.Request) {
 }
 
 func copyFile(w http.ResponseWriter, r *http.Request) {
+	if users != nil {
+		u := *users
+		username, password, ok := r.BasicAuth()
+		sum := fmt.Sprintf("%x", md5.Sum([]byte(password)))
+		if !ok || u[username] != sum {
+			log.Printf("Unauthorized access from %s", username)
+			http.Error(w, "Not Authorized", http.StatusUnauthorized)
+			return
+		}
+	}
 	err := r.ParseMultipartForm(100000)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -122,6 +137,32 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func loadAuthFile(file string) *map[string]string {
+	if file == "" {
+		return nil
+	} else {
+		a := make(map[string]string)
+		f, err := os.Open(file)
+		defer f.Close()
+		if err != nil {
+			log.Fatalf("Error opening authentication file %s", file)
+		}
+		scanner := bufio.NewScanner(f)
+		scanner.Split(bufio.ScanLines)
+		for scanner.Scan() {
+			line := strings.TrimSpace(scanner.Text())
+			if line != "" {
+				parts := strings.Split(line, " ")
+				if len(parts) != 2 {
+					log.Fatalf("Error reading authentication file")
+				}
+				a[parts[0]] = parts[1]
+			}
+		}
+		return &a
+	}
+}
+
 func parseCommandLine() {
 	flag.Parse()
 	absroot, err := filepath.Abs(*root)
@@ -147,6 +188,7 @@ func parseCommandLine() {
 	if *port > 65535 || *port < 0 {
 		log.Fatalf("Bad port number %d", *port)
 	}
+	users = loadAuthFile(*auth)
 }
 
 func main() {
