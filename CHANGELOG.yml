@@ -3,3 +3,5 @@
 - version: 1.0.0
   date:    2015-07-28
   summary: First release
+  note:
+  - "This first release can serve packages but may not accept some."
