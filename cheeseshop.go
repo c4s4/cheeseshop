@@ -41,7 +41,7 @@ func servePackage(filename string, w http.ResponseWriter, r *http.Request) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	filename := filepath.Join(*root, r.URL.Path[1:])
+	filename := filepath.Join(*root, r.URL.Path[len(*path):])
 	if info, err := os.Stat(filename); err != nil {
 		url := *shop + r.URL.Path
 		log.Print("Redirecting to ", url)
@@ -83,7 +83,6 @@ func parseCommandLine() {
 	if *port > 65535 || *port < 0 {
 		log.Fatalf("Bad port number %d", *port)
 	}
-
 }
 
 func main() {
