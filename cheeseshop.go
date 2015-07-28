@@ -19,9 +19,9 @@ const (
 )
 
 var port = flag.Int("port", 8000, "The port CheeseShop is listening")
-var path = flag.String("path", "/simple/", "The URL path")
+var path = flag.String("path", "simple", "The URL path")
 var root = flag.String("root", ".", "The root directory for packages")
-var shop = flag.String("shop", "http://pypi.python.org", "Shop to redirect to when not found")
+var shop = flag.String("shop", "http://pypi.python.org", "Redirection when not found")
 
 func listDirectory(dir string, w http.ResponseWriter, r *http.Request) {
 	files, err := ioutil.ReadDir(dir)
@@ -62,15 +62,34 @@ func parseCommandLine() {
 	flag.Parse()
 	absroot, err := filepath.Abs(*root)
 	if err != nil {
-		panic("Error building root directory")
+		log.Fatal("Error building root directory")
 	}
 	root = &absroot
+	info, err := os.Stat(*root)
+	if err != nil {
+		log.Fatalf("Root directory %s not found", *root)
+	}
+	if !info.Mode().IsDir() {
+		log.Fatalf("Root %s is not a directory", *root)
+	}
+	if !strings.HasPrefix(*path, "/") {
+		p := "/" + *path
+		path = &p
+	}
+	if !strings.HasSuffix(*path, "/") {
+		p := *path + "/"
+		path = &p
+	}
+	if *port > 65535 || *port < 0 {
+		log.Fatalf("Bad port number %d", *port)
+	}
+
 }
 
 func main() {
 	parseCommandLine()
 	http.HandleFunc(*path, handler)
-	log.Print("Starting CheeseShop version ", VERSION)
+	log.Print("Starting CheeseShop (version: ", VERSION, ", path: ", *path, ", port: ", *port, ", root: ", *root, ")")
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 	log.Print("Stopping CheeseShop")
 }
