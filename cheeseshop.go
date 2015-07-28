@@ -23,38 +23,66 @@ var path = flag.String("path", "simple", "The URL path")
 var root = flag.String("root", ".", "The root directory for packages")
 var shop = flag.String("shop", "http://pypi.python.org", "Redirection when not found")
 
-func listDirectory(dir string, w http.ResponseWriter, r *http.Request) {
-	files, err := ioutil.ReadDir(dir)
+func listRoot(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Listing root %s", *root)
+	files, err := ioutil.ReadDir(*root)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error listing directory %s", dir), 500)
+		http.Error(w, fmt.Sprintf("Error listing root directory %s", *root), 500)
+		return
 	}
-	pkg := dir[strings.LastIndex(dir, "/")+1:]
-	w.Write([]byte(fmt.Sprintf(LIST_HEAD, pkg, pkg)))
+	w.Write([]byte(fmt.Sprintf(LIST_HEAD, "root", "root")))
 	for _, file := range files {
-		w.Write([]byte(fmt.Sprintf(LIST_ELEMENT, *path+pkg+"/"+file.Name(), file.Name())))
+		if file.Mode().IsDir() {
+			w.Write([]byte(fmt.Sprintf(LIST_ELEMENT, *path+file.Name(), file.Name())))
+		}
 	}
 	w.Write([]byte(LIST_TAIL))
 }
 
-func servePackage(filename string, w http.ResponseWriter, r *http.Request) {
+func listDirectory(dir string, w http.ResponseWriter, r *http.Request) {
+	directory := filepath.Join(*root, dir)
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		url := *shop + *path + dir
+		log.Printf("Redirecting to %s", url)
+		http.Redirect(w, r, url, 302)
+		return
+	}
+	log.Printf("Listing directory %s", directory)
+	files, err := ioutil.ReadDir(directory)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error listing directory %s", dir), 500)
+		return
+	}
+	w.Write([]byte(fmt.Sprintf(LIST_HEAD, dir, dir)))
+	for _, file := range files {
+		w.Write([]byte(fmt.Sprintf(LIST_ELEMENT, *path+dir+"/"+file.Name(), file.Name())))
+	}
+	w.Write([]byte(LIST_TAIL))
+}
+
+func servePackage(dir, file string, w http.ResponseWriter, r *http.Request) {
+	filename := filepath.Join(*root, dir, file)
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		url := *shop + *path + dir + "/" + file
+		log.Printf("Redirecting to %s", url)
+		http.Redirect(w, r, url, 302)
+		return
+	}
+	log.Printf("Serving file %s", filename)
 	http.ServeFile(w, r, filename)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	filename := filepath.Join(*root, r.URL.Path[len(*path):])
-	if info, err := os.Stat(filename); err != nil {
-		url := *shop + r.URL.Path
-		log.Print("Redirecting to ", url)
-		http.Redirect(w, r, url, 302)
+	parts := strings.Split(r.URL.Path[len(*path):], "/")
+	if len(parts) > 2 {
+		http.Error(w, fmt.Sprintf("%s is not a valid path", r.URL.Path), 404)
+		return
+	} else if len(parts) == 1 && parts[0] == "" {
+		listRoot(w, r)
+	} else if len(parts) == 1 {
+		listDirectory(parts[0], w, r)
 	} else {
-		switch mode := info.Mode(); {
-		case mode.IsDir():
-			log.Print("Listing directory ", filename)
-			listDirectory(filename, w, r)
-		case mode.IsRegular():
-			log.Print("Serving package ", filename)
-			servePackage(filename, w, r)
-		}
+		servePackage(parts[0], parts[1], w, r)
 	}
 }
 
