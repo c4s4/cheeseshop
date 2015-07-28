@@ -73,16 +73,48 @@ func servePackage(dir, file string, w http.ResponseWriter, r *http.Request) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	parts := strings.Split(r.URL.Path[len(*path):], "/")
-	if len(parts) > 2 {
-		http.Error(w, fmt.Sprintf("%s is not a valid path", r.URL.Path), 404)
-		return
-	} else if len(parts) == 1 && parts[0] == "" {
-		listRoot(w, r)
-	} else if len(parts) == 1 {
-		listDirectory(parts[0], w, r)
-	} else {
-		servePackage(parts[0], parts[1], w, r)
+	if r.Method == "GET" {
+		parts := strings.Split(r.URL.Path[len(*path):], "/")
+		if len(parts) > 2 {
+			http.Error(w, fmt.Sprintf("%s is not a valid path", r.URL.Path), 404)
+			return
+		} else if len(parts) == 1 && parts[0] == "" {
+			listRoot(w, r)
+		} else if len(parts) == 1 {
+			listDirectory(parts[0], w, r)
+		} else {
+			servePackage(parts[0], parts[1], w, r)
+		}
+	} else if r.Method == "POST" {
+		err := r.ParseMultipartForm(100000)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		m := r.MultipartForm
+		// DEBUG
+		println(fmt.Sprintf(">>>>>>>>>> %#v", m))
+		files := m.File["myfiles"]
+		for i, _ := range files {
+			// DEBUG
+			println(files[i].Filename)
+			//file, err := files[i].Open()
+			//defer file.Close()
+			//if err != nil {
+			//	http.Error(w, err.Error(), http.StatusInternalServerError)
+			//	return
+			//}
+			//dst, err := os.Create("/home/sanat/" + files[i].Filename)
+			//defer dst.Close()
+			//if err != nil {
+			//	http.Error(w, err.Error(), http.StatusInternalServerError)
+			//	return
+			//}
+			//if _, err := io.Copy(dst, file); err != nil {
+			//	http.Error(w, err.Error(), http.StatusInternalServerError)
+			//	return
+			//}
+		}
 	}
 }
 
