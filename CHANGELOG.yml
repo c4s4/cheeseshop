@@ -1,5 +1,11 @@
 # Semantic changelog: https://github.com/c4s4/changelog
 
+- version: 1.1.0
+  date:    2015-07-28
+  summary: Added package upload
+  added:
+  - "Package upload without authentication."
+
 - version: 1.0.0
   date:    2015-07-28
   summary: First release
