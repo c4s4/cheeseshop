@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -72,6 +73,37 @@ func servePackage(dir, file string, w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filename)
 }
 
+func copyFile(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(100000)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	m := r.MultipartForm
+	files := m.File["content"]
+	for _, file := range files {
+		name := file.Filename
+		pack := name[:strings.LastIndex(name, "-")]
+		log.Printf("Writing file %s", name)
+		f, err := file.Open()
+		defer f.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		dst, err := os.Create(filepath.Join(*root, pack, name))
+		defer dst.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if _, err := io.Copy(dst, f); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		parts := strings.Split(r.URL.Path[len(*path):], "/")
@@ -86,35 +118,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			servePackage(parts[0], parts[1], w, r)
 		}
 	} else if r.Method == "POST" {
-		err := r.ParseMultipartForm(100000)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		m := r.MultipartForm
-		// DEBUG
-		println(fmt.Sprintf(">>>>>>>>>> %#v", m))
-		files := m.File["myfiles"]
-		for i, _ := range files {
-			// DEBUG
-			println(files[i].Filename)
-			//file, err := files[i].Open()
-			//defer file.Close()
-			//if err != nil {
-			//	http.Error(w, err.Error(), http.StatusInternalServerError)
-			//	return
-			//}
-			//dst, err := os.Create("/home/sanat/" + files[i].Filename)
-			//defer dst.Close()
-			//if err != nil {
-			//	http.Error(w, err.Error(), http.StatusInternalServerError)
-			//	return
-			//}
-			//if _, err := io.Copy(dst, file); err != nil {
-			//	http.Error(w, err.Error(), http.StatusInternalServerError)
-			//	return
-			//}
-		}
+		copyFile(w, r)
 	}
 }
 
