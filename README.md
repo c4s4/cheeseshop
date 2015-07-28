@@ -24,4 +24,17 @@ There are binaries for following platforms:
 Usage
 -----
 
+To run the server, type on command line :
+
+    cheeseshop -port 8000 -path simple -root . -shop http://pypi.python.org
+
+Options on command line :
+
+- *-port* to set the port the server is litening (default to *8000*).
+- *-path* to set the URL path (defaults to *simple*).
+- *-root* to set the directory where packages are living (defaults to current directory).
+- *-shop* to set the URL of the shop for packages that are not found.
+
+The server outputs logs on the terminal. To get help on the console, type `cheeseshop -help`.
+
 *Enjoy!*
