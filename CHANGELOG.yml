@@ -5,6 +5,7 @@
   summary: Added configuration file
   added:
   - "Added configuration file."
+  - "Added configuration file sample to run as a service."
   removed:
   - "No more options on command line (you can only pass the path to 
      configuration file."
