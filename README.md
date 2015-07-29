@@ -60,4 +60,31 @@ To compute MD5 sum for a given password, in order to fill the authentication fil
     $ echo -n bar | md5sum
     37b51d194a7513e45b56f6524f2d51f2  -
 
+There is a sample configuration file in *etc* directory of the archive.
+
+Service
+-------
+
+To install CheeseShop as a System V service, edit sample init script in *etc/cheeseshop.init* file. You should edit *SCRIPT* variable to set the path to the *cheeseshop* command. Then copy this file as */etc/init.d/cheeseshop*.
+
+You must also edit configuration file *etc/cheeseshop.yml* to set the repository location in the *root* variable. Copy this file in */etc/cheeseshop.yml* location.
+
+You can then start the service with:
+
+    $ sudo service cheeseshop start
+
+And stop it with:
+
+    $ sudo service cheeseshop stop
+
+You can view the logs in */var/log/cheeseshop.log* file.
+
+To start the service at boot, you should type:
+
+    $ sudo update-rc.d cheeseshop defaults
+
+And to disable start at boot:
+
+    $ sudo update-rc.d -f cheeseshop remove
+
 *Enjoy!*
