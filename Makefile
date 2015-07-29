@@ -33,7 +33,7 @@ build:
 
 run: build
 	@echo "$(YELLOW)Run Cheese Shop$(CLEAR)"
-	$(BUILD_DIR)/$(NAME)
+	$(BUILD_DIR)/$(NAME) -root repo
 
 compile: clean
 	@echo "$(YELLOW)Generating binaries for all platforms$(CLEAR)"
