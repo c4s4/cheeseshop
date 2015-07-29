@@ -31,9 +31,9 @@ build:
 	sed -e s/UNKNOWN/$(VERSION)/ $(NAME).go > $(BUILD_DIR)/$(NAME).go
 	cd $(BUILD_DIR) && go build $(NAME).go
 
-run: build
+run: clean build
 	@echo "$(YELLOW)Run Cheese Shop$(CLEAR)"
-	$(BUILD_DIR)/$(NAME) -root repo
+	$(BUILD_DIR)/$(NAME) etc/cheeseshop.yml
 
 compile: clean
 	@echo "$(YELLOW)Generating binaries for all platforms$(CLEAR)"
@@ -43,7 +43,7 @@ compile: clean
 
 archive: compile
 	@echo "$(YELLOW)Generating distribution archive$(CLEAR)"
-	cp LICENSE.txt $(BUILD_DIR)/$(NAME)-$(VERSION)
+	cp -r LICENSE.txt etc/ $(BUILD_DIR)/$(NAME)-$(VERSION)
 	md2pdf README.md && mv README.pdf $(BUILD_DIR)/$(NAME)-$(VERSION)
 	changelog to html style > $(BUILD_DIR)/$(NAME)-$(VERSION)/CHANGELOG.html
 	cd $(BUILD_DIR) && tar cvf $(NAME)-$(VERSION).tar $(NAME)-$(VERSION)/*

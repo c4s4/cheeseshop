@@ -23,25 +23,41 @@ There are binaries for following platforms:
 Usage
 -----
 
-To get help, type following command:
+To run CheeseShop, type on command line:
 
-    $ cheeseshop -help
-    Usage of build/cheeseshop:
-      -auth="": Path to the authentication file
-      -path="simple": The URL path
-      -port=8000: The port CheeseShop is listening
-      -root=".": The root directory for packages
-      -shop="http://pypi.python.org/simple": Redirection when not found
+    $ cheeseshop
 
-The authentication file is made of lines with the username and the MD5 sum of the password separated with a space, such as (for user *foo* with password *bar*):
+It will look for a configuration file at following locations:
 
-    foo 37b51d194a7513e45b56f6524f2d51f2
+- *~/.cheeseshop.yml*
+- */etc/cheeseshop.yml*
+
+You may also pass the path to the configuration file on the command line:
+
+    $ cheeseshop /path/to/cheeseshop.yml
+
+This configuration file should look like this:
+
+    # The port CheeseShop is listening
+    port: 8000
+    # The URL path
+    path: simple
+    # The root directory for packages
+    root: repo
+    # Redirection when not found
+    shop: http://pypi.python.org/simple
+    # List of users and their MD5 hashed password
+    # To get MD5 sum for password foo, type 'echo -n foo | md5sum'
+    # To disable auth when uploading packages, set auth to ~
+    auth:
+        spam: acbd18db4cc2f85cedef654fccc4a4d8
+        eggs: 37b51d194a7513e45b56f6524f2d51f2
 
 To compute MD5 sum for a given password, in order to fill the authentication file, you may type following command :
 
+    $ echo -n foo | md5sum
+    acbd18db4cc2f85cedef654fccc4a4d8  -
     $ echo -n bar | md5sum
     37b51d194a7513e45b56f6524f2d51f2  -
-
-If no *-auth* option is set on command line, you won't have to authenticate to upload a package to *CheeseShop*.
 
 *Enjoy!*

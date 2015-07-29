@@ -2,7 +2,12 @@
 
 - version: 1.3.0
   date:    2015-07-28
-  summary: ???
+  summary: Added configuration file
+  added:
+  - "Added configuration file."
+  removed:
+  - "No more options on command line (you can only pass the path to 
+     configuration file."
   fixed:
   - "Added URL path to redirection shop (thus defaults to 
      *http://pypi.python.org/simple* instead of *http://pypi.python.org*)."
