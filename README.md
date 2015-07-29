@@ -23,19 +23,15 @@ There are binaries for following platforms:
 Usage
 -----
 
-To run the server, type on command line :
+To get help, type following command:
 
-    cheeseshop -port 8000 -path simple -root . -shop http://pypi.python.org
-
-Options on command line :
-
-- *-port* to set the port the server is litening (default to *8000*).
-- *-path* to set the URL path (defaults to *simple*).
-- *-root* to set the directory where packages are living (defaults to current directory).
-- *-shop* to set the URL of the shop for packages that are not found.
-- *-auth* to set the path to the authentication file
-
-The server outputs logs on the terminal. To get help on the console, type `cheeseshop -help`.
+    $ cheeseshop -help
+    Usage of build/cheeseshop:
+      -auth="": Path to the authentication file
+      -path="simple": The URL path
+      -port=8000: The port CheeseShop is listening
+      -root=".": The root directory for packages
+      -shop="http://pypi.python.org/simple": Redirection when not found
 
 The authentication file is made of lines with the username and the MD5 sum of the password separated with a space, such as (for user *foo* with password *bar*):
 

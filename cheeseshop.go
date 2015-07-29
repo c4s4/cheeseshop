@@ -24,7 +24,7 @@ const (
 var port = flag.Int("port", 8000, "The port CheeseShop is listening")
 var path = flag.String("path", "simple", "The URL path")
 var root = flag.String("root", ".", "The root directory for packages")
-var shop = flag.String("shop", "http://pypi.python.org", "Redirection when not found")
+var shop = flag.String("shop", "http://pypi.python.org/simple", "Redirection when not found")
 var auth = flag.String("auth", "", "Path to the authentication file")
 
 var users *map[string]string
@@ -33,7 +33,7 @@ func listRoot(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Listing root %s", *root)
 	files, err := ioutil.ReadDir(*root)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error listing root directory %s", *root), 500)
+		http.Error(w, fmt.Sprintf("Error listing root directory %s", *root), http.StatusInternalServerError)
 		return
 	}
 	w.Write([]byte(fmt.Sprintf(LIST_HEAD, "root", "root")))
@@ -48,15 +48,15 @@ func listRoot(w http.ResponseWriter, r *http.Request) {
 func listDirectory(dir string, w http.ResponseWriter, r *http.Request) {
 	directory := filepath.Join(*root, dir)
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
-		url := *shop + *path + dir
+		url := *shop + "/" + dir
 		log.Printf("Redirecting to %s", url)
-		http.Redirect(w, r, url, 302)
+		http.Redirect(w, r, url, http.StatusFound)
 		return
 	}
 	log.Printf("Listing directory %s", directory)
 	files, err := ioutil.ReadDir(directory)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error listing directory %s", dir), 500)
+		http.Error(w, fmt.Sprintf("Error listing directory %s", dir), http.StatusInternalServerError)
 		return
 	}
 	w.Write([]byte(fmt.Sprintf(LIST_HEAD, dir, dir)))
@@ -69,9 +69,9 @@ func listDirectory(dir string, w http.ResponseWriter, r *http.Request) {
 func servePackage(dir, file string, w http.ResponseWriter, r *http.Request) {
 	filename := filepath.Join(*root, dir, file)
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		url := *shop + *path + dir + "/" + file
+		url := *shop + "/" + dir + "/" + file
 		log.Printf("Redirecting to %s", url)
-		http.Redirect(w, r, url, 302)
+		http.Redirect(w, r, url, http.StatusFound)
 		return
 	}
 	log.Printf("Serving file %s", filename)
@@ -123,7 +123,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		parts := strings.Split(r.URL.Path[len(*path):], "/")
 		if len(parts) > 2 {
-			http.Error(w, fmt.Sprintf("%s is not a valid path", r.URL.Path), 404)
+			http.Error(w, fmt.Sprintf("%s is not a valid path", r.URL.Path), http.StatusNotFound)
 			return
 		} else if len(parts) == 1 && parts[0] == "" {
 			listRoot(w, r)
