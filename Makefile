@@ -37,9 +37,9 @@ run: build
 
 compile: clean
 	@echo "$(YELLOW)Generating binaries for all platforms$(CLEAR)"
-	mkdir -p $(BUILD_DIR)/$(NAME)-$(VERSION)
+	mkdir -p $(BUILD_DIR)/$(NAME)-$(VERSION)/bin
 	sed -e s/UNKNOWN/$(VERSION)/ $(NAME).go > $(BUILD_DIR)/$(NAME).go
-	cd $(BUILD_DIR) && gox -output=$(NAME)-$(VERSION)/$(NAME)-{{.OS}}-{{.Arch}}
+	cd $(BUILD_DIR) && gox -output=$(NAME)-$(VERSION)/bin/$(NAME)-{{.OS}}-{{.Arch}}
 
 archive: compile
 	@echo "$(YELLOW)Generating distribution archive$(CLEAR)"
