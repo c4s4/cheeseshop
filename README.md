@@ -106,13 +106,13 @@ To disable HTTP or HTTPS, you must set port to *0*. If HTTPS is disabled, you do
 
 To generate a key, you can use openssl as follows:
 
-    openssl genrsa -out cheeseshop-key.pem 2048
+    $ openssl genrsa -out cheeseshop-key.pem 2048
 
 To generate au self signed certificate, you can type:
 
-    openssl req -new -x509 -key cheeseshop-key.pem -out cheeseshop-cert.pem -days 3650
+    $ openssl req -new -x509 -key cheeseshop-key.pem -out cheeseshop-cert.pem -days 3650
 
-This command will ask you many fields, but the only that is necessary is the *FQDN* which is the name of the machine that is running CheeseShop.
+This command will ask you many fields, but the only that is necessary is the *FQDN* which is the hostname of the machine that is running CheeseShop.
 
 You should copy the certificate in directory */etc/ssl/certs* and the key in */etc/ssl/private*.
 
@@ -150,7 +150,7 @@ To build CheeseShop, you must install [Goyaml](http://github.com/go-yaml/yaml) a
     $ go get github.com/mitchellh/gox
     $ gox -build-toolchain
 
-Then you can use the make file to build the binary version for your platform:
+Then you can use the makefile to build the binary version for your platform:
 
     $ make build
 
