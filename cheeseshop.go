@@ -24,11 +24,14 @@ const (
 var DEFAULT_CONFIG = []string{"~/.cheeseshop.yml", "/etc/cheeseshop.yml"}
 
 type Config struct {
-	Port int
-	Path string
-	Root string
-	Shop string
-	Auth map[string]string
+	Http  int
+	Https int
+	Path  string
+	Root  string
+	Shop  string
+	Cert  string
+	Key   string
+	Auth  map[string]string
 }
 
 var config Config
@@ -206,17 +209,34 @@ func checkConfig() {
 	if !strings.HasSuffix(config.Path, "/") {
 		config.Path = config.Path + "/"
 	}
-	if config.Port > 65535 || config.Port < 0 {
-		log.Fatalf("Bad port number %d", config.Port)
+	if config.Http > 65535 || config.Http < 0 {
+		log.Fatalf("Bad HTTP port number %d", config.Http)
+	}
+	if config.Https > 65535 || config.Https < 0 {
+		log.Fatalf("Bad HTTPS port number %d", config.Https)
+	}
+	if config.Http == 0 && config.Https == 0 {
+		log.Fatal("At least one of HTTP or HTTPS must be enabled")
 	}
 }
 
 func main() {
 	loadConfig()
 	checkConfig()
+	log.Printf("Starting CheeseShop (ports: %d & %d, path: %s, root: %s, shop: %s)",
+		config.Http, config.Https, config.Path, config.Root, config.Shop)
 	http.HandleFunc(config.Path, handler)
-	log.Printf("Starting CheeseShop (port: %d, path: %s, root: %s, shop: %s)",
-		config.Port, config.Path, config.Root, config.Shop)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), nil))
-	log.Print("Stopping CheeseShop")
+	if config.Http != 0 {
+		go func() {
+			log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Http), nil))
+		}()
+	}
+	if config.Https != 0 {
+		go func() {
+			log.Fatal(http.ListenAndServeTLS(fmt.Sprintf(":%d", config.Https),
+				normalizeFile(config.Cert), normalizeFile(config.Key), nil))
+		}()
+	}
+	wait := make(chan bool, 1)
+	<-wait
 }

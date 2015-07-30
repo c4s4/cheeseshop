@@ -9,7 +9,8 @@ CheeseShop is a Python package repository. This is a local version of the well-k
 To tell PIP where is your private CheeseShop, you must edit you *~/.pip/pip.conf* file:
 
     [global]
-    index-url = http://my.shop.host:8000/simple
+    index-url = http://my.shop.host/simple
+    trusted-host = my.shop.host
 
 Where *my.shop.host* is the hostname of the machine running CheeseShop. PIP will call your CheeseShop to get packages. If CheeseShop doesn't host this package it will redirect PIP to standard Pypi.
 
@@ -27,13 +28,15 @@ To tell *setup.py* where to upload your package, you must edit file *~/.pypirc*:
     [cheeseshop]
     username: spam
     password: foo
-    repository: http://my.shop.host:8000/simple/
+    repository: http://my.shop.host/simple/
 
-*setup.py* will call your CheeseShop if you tell it to use *cheeseshop* connection with following command line:
+*setup.py* will call your CheeseShop if you name it on command line:
 
     $ python setup.py sdist upload -r cheeseshop
 
 Where `-r cheeseshop` is the option that indicates the connection you want to use. There must be a corresponding entry in your *~/.pypirc* configuration file. Don't forget to add *cheeseshop* in the *index-server* list at the beginning of the file.
+
+CheeseShop is able to run on HTTP and/or HTTPS and performs basic authentication if necessary.
 
 Installation
 ------------
@@ -67,14 +70,20 @@ You may also pass the path to the configuration file on the command line:
 
 This configuration file should look like this:
 
-    # The port CheeseShop is listening
-    port: 8000
-    # The URL path
-    path: simple
     # The root directory for packages
-    root: repo
+    root:  /home/cheeseshop
+    # Path to the server certificate
+    cert:  /etc/ssl/certs/cheeseshop-cert.pem
+    # Path to the server key
+    key:   /etc/ssl/private/cheeseshop-key.pem
+    # The HTTP port CheeseShop is listening
+    http:  80
+    # The HTTPS port CheeseShop is listening 
+    https: 443
+    # The URL path
+    path:  simple
     # Redirection when not found
-    shop: http://pypi.python.org/simple
+    shop:  http://pypi.python.org/simple
     # List of users and their MD5 hashed password
     # To get MD5 sum for password foo, type 'echo -n foo | md5sum'
     # To disable auth when uploading packages, set auth to ~
@@ -90,6 +99,22 @@ To compute MD5 sum for a given password, in order to fill the authentication fil
     37b51d194a7513e45b56f6524f2d51f2  -
 
 There is a sample configuration file in *etc* directory of the archive.
+
+Of course, you must create an empty directory for the repository. Ensure that the user running CheeseShop has a right to write in this directory.
+
+To disable HTTP or HTTPS, you must set port to *0*. If HTTPS is disabled, you don't have to set certificate and key paths. To disable basic authentication, you must set auth to `~` (which means none in YAML).
+
+To generate a key, you can use openssl as follows:
+
+    $ openssl genrsa -out cheeseshop-key.pem 2048
+
+To generate au self signed certificate, you can type:
+
+    $ openssl req -new -x509 -key cheeseshop-key.pem -out cheeseshop-cert.pem -days 3650
+
+This command will ask you many fields, but the only that is necessary is the *FQDN* which is the hostname of the machine that is running CheeseShop.
+
+You should copy the certificate in directory */etc/ssl/certs* and the key in */etc/ssl/private*.
 
 Service
 -------
@@ -125,7 +150,7 @@ To build CheeseShop, you must install [Goyaml](http://github.com/go-yaml/yaml) a
     $ go get github.com/mitchellh/gox
     $ gox -build-toolchain
 
-Then you can use the make file to build the binary version for your platform:
+Then you can use the makefile to build the binary version for your platform:
 
     $ make build
 
