@@ -30,6 +30,8 @@ build:
 	mkdir -p $(BUILD_DIR)
 	sed -e s/UNKNOWN/$(VERSION)/ $(NAME).go > $(BUILD_DIR)/$(NAME).go
 	cd $(BUILD_DIR) && go build $(NAME).go
+	cp etc/generate_cert.go $(BUILD_DIR)
+	cd $(BUILD_DIR) && go build generate_cert.go
 
 run: clean build
 	@echo "$(YELLOW)Run Cheese Shop$(CLEAR)"
