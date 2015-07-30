@@ -1,11 +1,17 @@
-# The port CheeseShop is listening
-port: 8000
-# The URL path
-path: simple
 # The root directory for packages
-root: repo
+root:  repo
+# Path to the server certificate
+cert:  etc/cert.pem
+# Path to the server key
+key:   etc/key.pem
+# The HTTP port CheeseShop is listening
+http:  80
+# The HTTPS port CheeseShop is listening
+https: 443
+# The URL path
+path:  simple
 # Redirection when not found
-shop: http://pypi.python.org/simple
+shop:  http://pypi.python.org/simple
 # List of users and their MD5 hashed password
 # To get MD5 sum for password foo, type 'echo -n foo | md5sum'
 # To disable auth when uploading packages, set auth to ~
