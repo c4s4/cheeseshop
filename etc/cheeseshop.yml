@@ -1,5 +1,5 @@
 # The root directory for packages
-root:  repo
+root:  /home/cheeseshop
 # Path to the server certificate
 cert:  /etc/ssl/certs/cheeseshop-cert.pem
 # Path to the server key
