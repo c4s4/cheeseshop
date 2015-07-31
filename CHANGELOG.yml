@@ -1,5 +1,12 @@
 # Semantic changelog: https://github.com/c4s4/changelog
 
+- version: 1.4.2
+  date:    2015-07-31
+  summary: Added configuration field overwrite
+  fixed:
+  - "Added configuration field *overwrite* to tell if we can overwrite an
+     existing package."
+
 - version: 1.4.1
   date:    2015-07-30
   summary: Improved documentation

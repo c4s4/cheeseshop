@@ -87,6 +87,8 @@ The configuration file should look like this:
     path:  simple
     # Redirection when not found
     shop:  http://pypi.python.org/simple
+    # Tells if we can overwrite an existing package
+    overwrite: false
     # List of users and their MD5 hashed password
     # To get MD5 sum for password foo, type 'echo -n foo | md5sum'
     # To disable auth when uploading packages, set auth to ~
@@ -148,6 +150,10 @@ This is the URL path that the server will listen. Default value is *simple*, thu
 ### shop
 
 This is the URL of the public package repository, aka <http://pypi.python.org/simple>. This should not be changed.
+
+### overwrite
+
+Tells if we can overwrite an existing package while uploading (with `setup.py upload`). If set to *false* (the default value), you must upload the package manually on the server to amend a release (which is **not** advisable), and an attempt will result in a status code *400*. If set to true, it is possible to overwrite a package.
 
 ### auth
 
