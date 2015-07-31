@@ -24,14 +24,15 @@ const (
 var DEFAULT_CONFIG = []string{"~/.cheeseshop.yml", "/etc/cheeseshop.yml"}
 
 type Config struct {
-	Http  int
-	Https int
-	Path  string
-	Root  string
-	Shop  string
-	Cert  string
-	Key   string
-	Auth  map[string]string
+	Http      int
+	Https     int
+	Path      string
+	Root      string
+	Shop      string
+	Cert      string
+	Key       string
+	Overwrite bool
+	Auth      map[string]string
 }
 
 var config Config
@@ -107,6 +108,12 @@ func copyFile(w http.ResponseWriter, r *http.Request) {
 		name := file.Filename
 		pack := name[:strings.LastIndex(name, "-")]
 		dir := filepath.Join(config.Root, pack)
+		path := filepath.Join(config.Root, pack, name)
+		if _, err := os.Stat(path); err == nil && !config.Overwrite {
+			log.Printf("Failed attempt to overwrite package %s", name)
+			http.Error(w, fmt.Sprintf("Package %s already exists", name), http.StatusBadRequest)
+			return
+		}
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			err = os.Mkdir(dir, 0777)
 			if err != nil {
@@ -123,7 +130,7 @@ func copyFile(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		dst, err := os.Create(filepath.Join(config.Root, pack, name))
+		dst, err := os.Create(path)
 		defer dst.Close()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -223,8 +230,8 @@ func checkConfig() {
 func main() {
 	loadConfig()
 	checkConfig()
-	log.Printf("Starting CheeseShop (ports: %d & %d, path: %s, root: %s, shop: %s)",
-		config.Http, config.Https, config.Path, config.Root, config.Shop)
+	log.Printf("Starting CheeseShop (ports: %d & %d, path: %s, root: %s, shop: %s, cert: %s, key: %s, overwrite: %t)",
+		config.Http, config.Https, config.Path, config.Root, config.Shop, config.Cert, config.Key, config.Overwrite)
 	http.HandleFunc(config.Path, handler)
 	if config.Http != 0 {
 		go func() {
