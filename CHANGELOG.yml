@@ -1,5 +1,11 @@
 # Semantic changelog: https://github.com/c4s4/changelog
 
+- version: 1.4.3
+  date:    2015-08-18
+  summary: Fixed redirection
+  fixed:
+  - "Fixed redirection so that protocol (http or https) is kept."
+
 - version: 1.4.2
   date:    2015-07-31
   summary: Added configuration field overwrite

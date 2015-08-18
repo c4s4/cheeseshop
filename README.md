@@ -86,7 +86,7 @@ The configuration file should look like this:
     # The URL path
     path:  simple
     # Redirection when not found
-    shop:  http://pypi.python.org/simple
+    shop:  pypi.python.org/simple
     # Tells if we can overwrite an existing package
     overwrite: false
     # List of users and their MD5 hashed password
@@ -149,7 +149,7 @@ This is the URL path that the server will listen. Default value is *simple*, thu
 
 ### shop
 
-This is the URL of the public package repository, aka <http://pypi.python.org/simple>. This should not be changed.
+This is the URL of the public package repository without protocol (*http* or *https*), such as *pypi.python.org/simple*. This should not be changed.
 
 ### overwrite
 

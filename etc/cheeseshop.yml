@@ -11,7 +11,7 @@ https: 443
 # The URL path
 path:  simple
 # Redirection when not found
-shop:  http://pypi.python.org/simple
+shop:  pypi.python.org/simple
 # Tells if we can overwrite an existing package
 overwrite: false
 # List of users and their MD5 hashed password
