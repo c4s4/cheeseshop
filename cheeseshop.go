@@ -53,12 +53,21 @@ func listRoot(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(LIST_TAIL))
 }
 
+func redirect(url string, w http.ResponseWriter, r *http.Request) {
+	if r.TLS == nil {
+		url = "http://" + url
+	} else {
+		url = "https://" + url
+	}
+	log.Printf("Redirecting to %s", url)
+	http.Redirect(w, r, url, http.StatusFound)
+}
+
 func listDirectory(dir string, w http.ResponseWriter, r *http.Request) {
 	directory := filepath.Join(config.Root, dir)
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		url := config.Shop + "/" + dir
-		log.Printf("Redirecting to %s", url)
-		http.Redirect(w, r, url, http.StatusFound)
+		redirect(url, w, r)
 		return
 	}
 	log.Printf("Listing directory %s", directory)
@@ -78,8 +87,7 @@ func servePackage(dir, file string, w http.ResponseWriter, r *http.Request) {
 	filename := filepath.Join(config.Root, dir, file)
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		url := config.Shop + "/" + dir + "/" + file
-		log.Printf("Redirecting to %s", url)
-		http.Redirect(w, r, url, http.StatusFound)
+		redirect(url, w, r)
 		return
 	}
 	log.Printf("Serving file %s", filename)
