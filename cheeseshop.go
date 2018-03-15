@@ -15,17 +15,18 @@ import (
 )
 
 const (
-	VERSION      = "UNKNOWN"
-	LIST_HEAD    = "<html><head><title>Links for %s</title></head><body><h1>Links for %s</h1>"
-	LIST_TAIL    = "</body></html>"
-	LIST_ELEMENT = "<a href='%s'>%s</a><br/>"
+	version     = "UNKNOWN"
+	listHead    = "<html><head><title>Links for %s</title></head><body><h1>Links for %s</h1>"
+	listTail    = "</body></html>"
+	listElement = "<a href='%s'>%s</a><br/>"
 )
 
-var DEFAULT_CONFIG = []string{"~/.cheeseshop.yml", "/etc/cheeseshop.yml"}
+var defaultConfig = []string{"~/.cheeseshop.yml", "/etc/cheeseshop.yml"}
 
+// Config contains configuration
 type Config struct {
-	Http      int
-	Https     int
+	HTTP      int
+	HTTPS     int
 	Path      string
 	Root      string
 	Shop      string
@@ -44,13 +45,13 @@ func listRoot(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Error listing root directory %s", config.Root), http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf(LIST_HEAD, "root", "root")))
+	w.Write([]byte(fmt.Sprintf(listHead, "root", "root")))
 	for _, file := range files {
 		if file.Mode().IsDir() {
-			w.Write([]byte(fmt.Sprintf(LIST_ELEMENT, config.Path+file.Name(), file.Name())))
+			w.Write([]byte(fmt.Sprintf(listElement, config.Path+file.Name(), file.Name())))
 		}
 	}
-	w.Write([]byte(LIST_TAIL))
+	w.Write([]byte(listTail))
 }
 
 func redirect(url string, w http.ResponseWriter, r *http.Request) {
@@ -76,11 +77,11 @@ func listDirectory(dir string, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Error listing directory %s", dir), http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf(LIST_HEAD, dir, dir)))
+	w.Write([]byte(fmt.Sprintf(listHead, dir, dir)))
 	for _, file := range files {
-		w.Write([]byte(fmt.Sprintf(LIST_ELEMENT, config.Path+dir+"/"+file.Name(), file.Name())))
+		w.Write([]byte(fmt.Sprintf(listElement, config.Path+dir+"/"+file.Name(), file.Name())))
 	}
-	w.Write([]byte(LIST_TAIL))
+	w.Write([]byte(listTail))
 }
 
 func servePackage(dir, file string, w http.ResponseWriter, r *http.Request) {
@@ -187,7 +188,7 @@ func loadConfig() {
 	if len(os.Args) > 1 {
 		file = os.Args[1]
 	} else {
-		for _, path := range DEFAULT_CONFIG {
+		for _, path := range defaultConfig {
 			path = normalizeFile(path)
 			if _, err := os.Stat(path); err == nil {
 				file = path
@@ -224,13 +225,13 @@ func checkConfig() {
 	if !strings.HasSuffix(config.Path, "/") {
 		config.Path = config.Path + "/"
 	}
-	if config.Http > 65535 || config.Http < 0 {
-		log.Fatalf("Bad HTTP port number %d", config.Http)
+	if config.HTTP > 65535 || config.HTTP < 0 {
+		log.Fatalf("Bad HTTP port number %d", config.HTTP)
 	}
-	if config.Https > 65535 || config.Https < 0 {
-		log.Fatalf("Bad HTTPS port number %d", config.Https)
+	if config.HTTPS > 65535 || config.HTTPS < 0 {
+		log.Fatalf("Bad HTTPS port number %d", config.HTTPS)
 	}
-	if config.Http == 0 && config.Https == 0 {
+	if config.HTTP == 0 && config.HTTPS == 0 {
 		log.Fatal("At least one of HTTP or HTTPS must be enabled")
 	}
 }
@@ -239,16 +240,16 @@ func main() {
 	loadConfig()
 	checkConfig()
 	log.Printf("Starting CheeseShop (ports: %d & %d, path: %s, root: %s, shop: %s, cert: %s, key: %s, overwrite: %t)",
-		config.Http, config.Https, config.Path, config.Root, config.Shop, config.Cert, config.Key, config.Overwrite)
+		config.HTTP, config.HTTPS, config.Path, config.Root, config.Shop, config.Cert, config.Key, config.Overwrite)
 	http.HandleFunc(config.Path, handler)
-	if config.Http != 0 {
+	if config.HTTP != 0 {
 		go func() {
-			log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Http), nil))
+			log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.HTTP), nil))
 		}()
 	}
-	if config.Https != 0 {
+	if config.HTTPS != 0 {
 		go func() {
-			log.Fatal(http.ListenAndServeTLS(fmt.Sprintf(":%d", config.Https),
+			log.Fatal(http.ListenAndServeTLS(fmt.Sprintf(":%d", config.HTTPS),
 				normalizeFile(config.Cert), normalizeFile(config.Key), nil))
 		}()
 	}
