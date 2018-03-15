@@ -1,5 +1,13 @@
 # Semantic changelog: https://github.com/c4s4/changelog
 
+- version: 1.5.0
+  date:    2018-03-15
+  summary: Fixed warnings
+  added:
+  - "Added new platforms building with Go 1.10."
+  fixed:
+  - "Fixed all warnings from Golint."
+
 - version: 1.4.3
   date:    2015-08-18
   summary: Fixed redirection
