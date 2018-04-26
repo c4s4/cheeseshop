@@ -8,31 +8,37 @@ CheeseShop is a Python package repository. This is a local version of the well-k
 
 To tell PIP where is your private CheeseShop, you must edit you *~/.pip/pip.conf* file:
 
-    [global]
-    index-url = http://my.shop.host/simple
-    trusted-host = my.shop.host
+```ini
+[global]
+index-url = http://my.shop.host/simple
+trusted-host = my.shop.host
+```
 
 Where *my.shop.host* is the hostname of the machine running CheeseShop. PIP will call your CheeseShop to get packages. If CheeseShop doesn't host this package it will redirect PIP to standard Pypi.
 
 To tell *setup.py* where to upload your package, you must edit file *~/.pypirc*:
 
-    [distutils]
-    index-servers =
-        pypi
-        cheeseshop
-    
-    [pypi]
-    username: ***
-    password: ***
-    
-    [cheeseshop]
-    username: spam
-    password: foo
-    repository: http://my.shop.host/simple/
+```ini
+[distutils]
+index-servers =
+    pypi
+    cheeseshop
+
+[pypi]
+username: ***
+password: ***
+
+[cheeseshop]
+username: spam
+password: foo
+repository: http://my.shop.host/simple/
+```
 
 *setup.py* will call your CheeseShop if you name it on command line:
 
-    $ python setup.py sdist upload -r cheeseshop
+```bash
+$ python setup.py sdist upload -r cheeseshop
+```
 
 Where `-r cheeseshop` is the option that indicates the connection you want to use. There must be a corresponding entry in your *~/.pypirc* configuration file. Don't forget to add *cheeseshop* in the *index-server* list at the beginning of the file.
 
@@ -57,7 +63,9 @@ Usage
 
 To run CheeseShop, type on command line:
 
-    $ cheeseshop
+```bash
+$ cheeseshop
+```
 
 It will look for a configuration file at following locations:
 
@@ -66,35 +74,39 @@ It will look for a configuration file at following locations:
 
 You may also pass the path to the configuration file on the command line:
 
-    $ cheeseshop /path/to/cheeseshop.yml
+```bash
+$ cheeseshop /path/to/cheeseshop.yml
+```
 
 Configuration
 -------------
 
 The configuration file should look like this:
 
-    # The root directory for packages
-    root:  /home/cheeseshop
-    # Path to the server certificate
-    cert:  /etc/ssl/certs/cheeseshop-cert.pem
-    # Path to the server key
-    key:   /etc/ssl/private/cheeseshop-key.pem
-    # The HTTP port CheeseShop is listening
-    http:  80
-    # The HTTPS port CheeseShop is listening 
-    https: 443
-    # The URL path
-    path:  simple
-    # Redirection when not found
-    shop:  pypi.python.org/simple
-    # Tells if we can overwrite an existing package
-    overwrite: false
-    # List of users and their MD5 hashed password
-    # To get MD5 sum for password foo, type 'echo -n foo | md5sum'
-    # To disable auth when uploading packages, set auth to ~
-    auth:
-        spam: acbd18db4cc2f85cedef654fccc4a4d8
-        eggs: 37b51d194a7513e45b56f6524f2d51f2
+```yaml
+# The root directory for packages
+root:  /home/cheeseshop
+# Path to the server certificate
+cert:  /etc/ssl/certs/cheeseshop-cert.pem
+# Path to the server key
+key:   /etc/ssl/private/cheeseshop-key.pem
+# The HTTP port CheeseShop is listening
+http:  80
+# The HTTPS port CheeseShop is listening 
+https: 443
+# The URL path
+path:  simple
+# Redirection when not found
+shop:  pypi.python.org/simple
+# Tells if we can overwrite an existing package
+overwrite: false
+# List of users and their MD5 hashed password
+# To get MD5 sum for password foo, type 'echo -n foo | md5sum'
+# To disable auth when uploading packages, set auth to ~
+auth:
+    spam: acbd18db4cc2f85cedef654fccc4a4d8
+    eggs: 37b51d194a7513e45b56f6524f2d51f2
+```
 
 There is a sample configuration in file *etc/cheeseshop.yml* of the archive.
 
@@ -102,14 +114,16 @@ There is a sample configuration in file *etc/cheeseshop.yml* of the archive.
 
 The root directory is where live the Python packages. Under this root there is a directory for each package. Files for versions of this package are in these subdirectories. Thus, if our repository hosts packages *spam* (in versions *1.0.0* and *1.1.0*) and *eggs* (in versions *1.0.0* and *1.0.1*) we would have following directory structure :
 
-    $ tree
-    .
-    ├── spam
-    │   ├── spam-1.0.0.tar.gz
-    │   └── spam-1.1.0.tar.gz
-    └── eggs
-        ├── eggs-1.0.0.tar.gz
-        └── eggs-1.0.1.tar.gz
+```
+$ tree
+.
+├── spam
+│   ├── spam-1.0.0.tar.gz
+│   └── spam-1.1.0.tar.gz
+└── eggs
+       ├── eggs-1.0.0.tar.gz
+       └── eggs-1.0.1.tar.gz
+```
 
 You must create this directory and ensure that user running the server has a right to write in this directory.
 
@@ -119,7 +133,9 @@ It is highly advised to backup this directory.
 
 This is the path to the CheeseShop private key. To generate such a key, you might type:
 
-    $ openssl genrsa -out cheeseshop-key.pem 2048
+```bash
+$ openssl genrsa -out cheeseshop-key.pem 2048
+```
 
 This will generate a file *cheeseshop-key.pem* that you should copy in directory */etc/ssl/private*, which is the standard place.
 
@@ -129,7 +145,9 @@ This is only necessary when running HTTPS server. If you run only HTTP, you may 
 
 This is the path to the CheeseShop certificate. To generate a self signed certificate, you can type:
 
-    $ openssl req -new -x509 -key cheeseshop-key.pem -out cheeseshop-cert.pem -days 3650
+```bash
+$ openssl req -new -x509 -key cheeseshop-key.pem -out cheeseshop-cert.pem -days 3650
+```
 
 This command will ask you many fields, but the only that is necessary is the *FQDN* which is the hostname of the machine that is running CheeseShop. A file named *cheeseshop-cert.pem* will be generated; you should copy this file in directory */etc/ssl/certs*, which is the standard place.
 
@@ -159,8 +177,10 @@ Tells if we can overwrite an existing package while uploading (with `setup.py up
 
 This is the basic authentication configuration. If you don't want authentication, set this value to *~*. This is a list of usernames and MD5 hash of their password. To get the MD5 hash of a given password, you can type following command:
 
-    $ echo -n foo | md5sum
-    acbd18db4cc2f85cedef654fccc4a4d8  -
+```bash
+$ echo -n foo | md5sum
+acbd18db4cc2f85cedef654fccc4a4d8  -
+```
 
 Note that if you modify this configuration, you must restart server, because this configuration is loaded at startup.
 
@@ -173,37 +193,51 @@ You must also edit configuration file *etc/cheeseshop.yml* to set the repository
 
 You can then start the service with:
 
-    $ sudo service cheeseshop start
+```bash
+$ sudo service cheeseshop start
+```
 
 And stop it with:
 
-    $ sudo service cheeseshop stop
+```bash
+$ sudo service cheeseshop stop
+```
 
 You can view the logs in */var/log/cheeseshop.log* file.
 
 To start the service at boot, you should type:
 
-    $ sudo update-rc.d cheeseshop defaults
+```bash
+$ sudo update-rc.d cheeseshop defaults
+```
 
 And to disable start at boot:
 
-    $ sudo update-rc.d -f cheeseshop remove
+```bash
+$ sudo update-rc.d -f cheeseshop remove
+```
 
 Build CheeseShop
 ----------------
 
 To build CheeseShop, you must install [Goyaml](http://github.com/go-yaml/yaml) and [GOX](http://github.com/mitchellh/gox) with following commands:
 
-    $ go get gopkg.in/yaml.v2
-    $ go get github.com/mitchellh/gox
-    $ gox -build-toolchain
+```bash
+$ go get gopkg.in/yaml.v2
+$ go get github.com/mitchellh/gox
+$ gox -build-toolchain
+```
 
 Then you can use the makefile to build the binary version for your platform:
 
-    $ make build
+```bash
+$ make build
+```
 
 To build binaries for all platforms, type:
 
-    $ make compile
+```bash
+$ make compile
+```
 
 *Enjoy!*
