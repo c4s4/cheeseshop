@@ -1,6 +1,6 @@
 # Semantic changelog: https://github.com/c4s4/changelog
 
-- version: 1.5.0
+- version: 1.5.0-SNAPSHOT
   date:    2018-03-15
   summary: Fixed warnings
   added:
