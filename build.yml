@@ -1,5 +1,50 @@
 # NeON Build File (http://github.com/c4s4/neon)
 
+default: run
 extends:
 - c4s4/build/golang.yml
 - c4s4/build/release.yml
+
+targets:
+
+  conf:
+    doc: Make local configuration
+    steps:
+    - mkdir: =BUILD_DIR
+    - copy:  'cheeseshop.yml'
+      dir:   'etc'
+      todir: =BUILD_DIR
+    - replace: '={BUILD_DIR}/cheeseshop.yml'
+      with:
+        'http:  80': 'http:  1080'
+        'https: 443': 'https: 1443'
+        '/home/cheeseshop': '={_BASE}/={BUILD_DIR}/repo'
+        '/etc/ssl/certs/cheeseshop-cert.pem': '={_BASE}/={BUILD_DIR}/cheeseshop-cert.pem'
+        '/etc/ssl/private/cheeseshop-key.pem': '={_BASE}/={BUILD_DIR}/cheeseshop-key.pem'
+
+  repo:
+    doc: Make fake repository
+    steps:
+    - mkdir: =BUILD_DIR
+    - mkdir: ['={BUILD_DIR}/repo/spam', '={BUILD_DIR}/repo/eggs']
+    - touch:
+      - '={BUILD_DIR}/repo/spam/spam-1.0.0.tar.gz'
+      - '={BUILD_DIR}/repo/spam/spam-1.1.0.tar.gz'
+      - '={BUILD_DIR}/repo/eggs/eggs-1.0.0.tar.gz'
+      - '={BUILD_DIR}/repo/eggs/eggs-1.0.1.tar.gz'
+
+  keys:
+    doc: Generate keys
+    steps:
+    - mkdir: =BUILD_DIR
+    - $: ['openssl', 'genrsa', '-out', '={BUILD_DIR}/cheeseshop-key.pem', '2048']
+    - $: ['openssl', 'req', '-new', '-x509', '-key', '={BUILD_DIR}/cheeseshop-key.pem',
+          '-out', '={BUILD_DIR}/cheeseshop-cert.pem', '-days', '3650']
+      <: ="FR\nGI\nBordeaux\nCompany\nSection\nCheeseshop\ntest@test.com\n"
+    - print: ''
+  
+  run:
+    doc: Run server
+    depends: [clean, conf, repo, keys]
+    steps:
+    - $: ['go', 'run', 'cheeseshop.go', '={BUILD_DIR}/cheeseshop.yml']
