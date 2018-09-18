@@ -1,12 +1,15 @@
 # Semantic changelog: https://github.com/c4s4/changelog
 
-- version: 1.5.0-SNAPSHOT
-  date:    2018-03-15
-  summary: Fixed warnings
+- version: 1.5.0
+  date:    2018-09-19
+  summary: Added systemd service script
   added:
   - "Added new platforms building with Go 1.10."
+  - "Added systemd service script."
+  - "Added modules support (in go.mod file)"
   fixed:
   - "Fixed all warnings from Golint."
+  - "Fixed the root repository URL."
 
 - version: 1.4.3
   date:    2015-08-18

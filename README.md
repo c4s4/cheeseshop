@@ -97,7 +97,7 @@ https: 443
 # The URL path
 path:  simple
 # Redirection when not found
-shop:  pypi.python.org/simple
+shop:  pypi.org/simple
 # Tells if we can overwrite an existing package
 overwrite: false
 # List of users and their MD5 hashed password
@@ -187,6 +187,8 @@ Note that if you modify this configuration, you must restart server, because thi
 Service
 -------
 
+### System V
+
 To install CheeseShop as a System V service, edit sample init script in *etc/cheeseshop.init* file. You should edit *SCRIPT* variable to set the path to the *cheeseshop* command. Then copy this file as */etc/init.d/cheeseshop*.
 
 You must also edit configuration file *etc/cheeseshop.yml* to set the repository location in the *root* variable. Copy this file in */etc/cheeseshop.yml* location.
@@ -215,6 +217,38 @@ And to disable start at boot:
 
 ```bash
 $ sudo update-rc.d -f cheeseshop remove
+```
+
+### Systemd
+
+To install CheeseShop as a Systemd service, edit sample service script in *etc/cheeseshop.service* file. Then copy this file as */etc/init.d/cheeseshop*.
+
+You must also edit configuration file *etc/cheeseshop.yml* to set the repository location in the *root* variable. Copy this file in */etc/cheeseshop.yml* location.
+
+You can then start the service with:
+
+```bash
+$ sudo systemctl start cheeseshop
+```
+
+And stop it with:
+
+```bash
+$ sudo systemctl stop cheeseshop
+```
+
+You can view the logs in */var/log/cheeseshop.log* file.
+
+To start the service at boot, you should type:
+
+```bash
+$ sudo systemd enable cheeseshop
+```
+
+And to disable start at boot:
+
+```bash
+$ sudo systemd disable cheeseshop
 ```
 
 Build CheeseShop
