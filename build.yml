@@ -4,10 +4,6 @@ default: run
 extends:
 - c4s4/build/golang.yml
 
-properties:
-  LIBRARIES:
-  - 'gopkg.in/yaml.v2'
-
 targets:
 
   conf:
@@ -51,3 +47,9 @@ targets:
     depends: [clean, conf, repo, keys]
     steps:
     - $: ['go', 'run', 'cheeseshop.go', '={BUILD_DIR}/cheeseshop.yml']
+
+  release:
+    doc: Perform a release
+    depends: [fmt, check, test, archive]
+    steps:
+    - super:
