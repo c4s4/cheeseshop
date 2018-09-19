@@ -7,6 +7,7 @@
   - "Added new platforms building with Go 1.11."
   - "Added modules support (in go.mod file)."
   - "Added systemd service script."
+  changed:
   - "Changed license to Apache."
   fixed:
   - "Fixed all warnings with Golint."
